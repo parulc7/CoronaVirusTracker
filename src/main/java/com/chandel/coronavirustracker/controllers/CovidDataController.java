@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Date;
 
 @Controller
 public class CovidDataController {
@@ -20,9 +19,13 @@ public class CovidDataController {
 
     @GetMapping("/")
     public String getData(Model model){
-        Date currentDate = new Date();
-        model.addAttribute("currentDate", currentDate);
-        model.addAttribute("locationStatsList", coronaVirusDataService.getAllStats());
+        int currentDateCases = coronaVirusDataService.getCurrentDayStats().stream().mapToInt(stat -> Integer.parseInt(stat.getCasesForToday())).sum();
+        int previousDateCases = coronaVirusDataService.getPreviousDayStats().stream().mapToInt(stat -> Integer.parseInt(stat.getCasesForToday())).sum();
+        int dailyChange = currentDateCases-previousDateCases;
+        model.addAttribute("currentDataCases", currentDateCases);
+        model.addAttribute("previousDateCases", previousDateCases);
+        model.addAttribute("dailyChange", dailyChange);
+        model.addAttribute("locationStatsList", coronaVirusDataService.getCurrentDayStats());
         return "home";
     }
 }
